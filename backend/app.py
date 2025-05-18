@@ -1,9 +1,19 @@
-from flask import Flask, redirect, url_for, session
+from flask import Flask, redirect, url_for, session, jsonify, send_from_directory
 from authlib.integrations.flask_client import OAuth
 from authlib.common.security import generate_token
+from flask_cors import CORS
+from dotenv import load_dotenv
 import os
+import requests
+
+load_dotenv()
+
+print("Loaded NYT_API_KEY:", os.getenv("NYT_API_KEY"))
+
+
 
 app = Flask(__name__)
+CORS(app)
 app.secret_key = os.urandom(24)
 
 
@@ -24,6 +34,31 @@ oauth.register(
     device_authorization_endpoint="http://dex:5556/device/code",
     client_kwargs={'scope': 'openid email profile'}
 )
+
+@app.route('/api/key')
+def get_key():
+    return jsonify({'apiKey': os.getenv('NYT_API_KEY')})
+
+@app.route('/api/articles')
+def get_articles():
+    nyt_api_key = os.getenv('NYT_API_KEY')
+    url = f'https://api.nytimes.com/svc/search/v2/articlesearch.json?q=davis+or+sacramento&api-key={nyt_api_key}'
+    
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        filtered_articles = [
+            article for article in data.get('response', {}).get('docs', [])
+            if 'davis' in article.get('headline', {}).get('main', '').lower() or
+               'sacramento' in article.get('headline', {}).get('main', '').lower()
+        ]
+        
+        return jsonify({'results': filtered_articles})
+    except Exception as e:
+        print('Error fetching NYT data:', e)
+        return jsonify({'results': [], 'error': str(e)})
+
 
 @app.route('/')
 def home():
