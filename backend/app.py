@@ -14,24 +14,58 @@ app = Flask(__name__)
 CORS(app)
 app.secret_key = os.urandom(24)
 
+#auth
+
+
 
 oauth = OAuth(app)
 
 nonce = generate_token()
 
+DEX_CLIENT_ID = os.getenv('OIDC_CLIENT_ID', "flask-app")
+DEX_CLIENT_NAME: str = os.getenv('OIDC_CLIENT_NAME', DEX_CLIENT_ID)
+DEX_CLIENT_SECRET: str = os.getenv('OIDC_CLIENT_SECRET', "flask-secret")
+
+DEX_INTERNAL_HOST = os.getenv('DEX_INTERNAL_HOST', "http://dex:5556")
+DEX_EXTERNAL_HOST = os.getenv('DEX_EXTERNAL_HOST', "http://localhost:5556")
+
+AUTHORIZATION_ENDPOINT = f"{DEX_INTERNAL_HOST}/auth"
+TOKEN_ENDPOINT = f"{DEX_INTERNAL_HOST}/token"
+JWKS_URI = f"{DEX_INTERNAL_HOST}/keys"
+USERINFO_ENDPOINT = f"{DEX_INTERNAL_HOST}/userinfo"
+DEVICE_AUTHORIZATION_ENDPOINT = f"{DEX_INTERNAL_HOST}/device/code"
+# Set up the OAuth client
 
 oauth.register(
-    name=os.getenv('OIDC_CLIENT_NAME'),
-    client_id=os.getenv('OIDC_CLIENT_ID'),
-    client_secret=os.getenv('OIDC_CLIENT_SECRET'),
-    #server_metadata_url='http://dex:5556/.well-known/openid-configuration',
-    authorization_endpoint="http://localhost:5556/auth",
-    token_endpoint="http://dex:5556/token",
-    jwks_uri="http://dex:5556/keys",
-    userinfo_endpoint="http://dex:5556/userinfo",
-    device_authorization_endpoint="http://dex:5556/device/code",
+    name=DEX_CLIENT_NAME,
+    client_id=DEX_CLIENT_ID,
+    client_secret=DEX_CLIENT_SECRET,
+    #server_metadata_url=f"{DEX_EXTERNAL_HOST}/.well-known/openid-configuration",
+    authorization_endpoint=AUTHORIZATION_ENDPOINT,
+    token_endpoint=TOKEN_ENDPOINT,
+    jwks_uri=JWKS_URI,
+    userinfo_endpoint=USERINFO_ENDPOINT,
+    device_authorization_endpoint=DEVICE_AUTHORIZATION_ENDPOINT,
     client_kwargs={'scope': 'openid email profile'}
 )
+
+
+
+
+
+#GIVEN: 
+# oauth.register(
+#     name=os.getenv('OIDC_CLIENT_NAME'),
+#     client_id=os.getenv('OIDC_CLIENT_ID'),
+#     client_secret=os.getenv('OIDC_CLIENT_SECRET'),
+#     #server_metadata_url='http://dex:5556/.well-known/openid-configuration',
+#     authorization_endpoint="http://localhost:5556/auth",
+#     token_endpoint="http://dex:5556/token",
+#     jwks_uri="http://dex:5556/keys",
+#     userinfo_endpoint="http://dex:5556/userinfo",
+#     device_authorization_endpoint="http://dex:5556/device/code",
+#     client_kwargs={'scope': 'openid email profile'}
+# )
 
 
 # Route to get NYT API key
