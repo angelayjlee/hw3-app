@@ -49,7 +49,7 @@
       console.error('Failed to fetch API key:', error);
       
     }
-  }); 
+
 
     try {
     const userRes = await fetch('http://localhost:8000/api/user', { credentials: 'include' });
