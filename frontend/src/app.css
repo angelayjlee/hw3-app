@@ -1,4 +1,4 @@
-:root {
+/*:root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -75,5 +75,157 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
+  }
+}
+*/
+/* Reset margin and padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  background-color: white;
+  color: black;
+}
+
+header {
+  display: flex;
+  flex-direction: column; /* Stack logo and date header vertically */
+  align-items: center;
+  position: relative;
+  margin-top: 20px;
+}
+
+.logo {
+  font-family: 'headline', serif;
+  font-size: 50px;
+  text-align: center;
+  z-index: 1; /* Ensures logo is always on top of date header */
+}
+
+.date-header {
+  position: absolute; /* Position date & today's paper label absolutely within header */
+  left: 3%;
+  top: 0;
+  margin-top: 20px;
+  transform: translateY(50%);
+  font-size: 14px;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.date {
+  font-weight: bold;
+}
+
+.today-label {
+  color: #333;
+}
+
+@media screen and (max-width: 1024px) {
+  .date-header {
+      display: none; /* Hide date header on smaller screens */
+  }
+}
+
+/* Seperate header from content divider */
+.headline-divider {
+  width: 95%;
+  border: none;
+  border-top: 1.4px solid #ccc;
+  margin: 20px auto 0 auto;
+}
+
+.content {
+  display: flex;
+  flex-wrap: wrap; /* Allow columns to wrap onto next line on small screen */
+  justify-content: space-between; 
+  gap: 10px;
+  margin: 12px;
+}
+
+.column {
+  flex: 1 1 30%; /* Each column takes up 30% of space */
+  padding: 15px;
+  border-left: 1px solid #ccc;
+  border-radius: 5px;
+  min-width: 280px; 
+}
+
+.column:first-child {
+  border-left: none; /* Remoces left border from 1st column */
+}
+
+.article {
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.article img {
+  display: block; /* image takes up full width */
+  max-width: 100%; /* prevents images from overflowing container */
+  height: 200px;
+  object-fit: cover;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.readMore-link {
+  font-size: 0.8rem; /* Adjust this value to make it smaller */
+  color: #007BFF; /* Optional: Customize the color */
+  text-decoration: underline; /* Optional: Remove underline */
+}
+
+/* footer styling */
+footer {
+  padding: 20px 0;  
+  text-align: center;  
+  font-size: 12px;  
+  color: #333;  
+}
+
+.footer-content p {
+  margin: 5px 0;  
+}
+
+
+.meta {
+  color: #777;
+  font-size: 12px;
+}
+
+hr {
+  margin: 20px 0;
+  border: 0;
+  height: 1px;
+  background-color: #ccc;
+}
+
+@font-face {
+  font-family: 'headline';
+  src: url('assets/headline.otf') format('opentype');
+}
+
+
+@media screen and (max-width: 1024px) {
+  .content {
+    flex-wrap: wrap;
+  }
+
+  .column {
+    flex: 1 1 48%; /* columns take up 48% on tablet view */
+  }
+
+  .column:nth-child(3) {
+    display: none; /* hides 3rd column on tablet view */
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .column {
+    flex: 1 1 100%; /* mobile view */
   }
 }
