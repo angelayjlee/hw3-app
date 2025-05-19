@@ -1,0 +1,3 @@
+1. Used GPT 4.1 
+2. asked to help debug and find errors
+3. helped a tiny bit but it didn't identify any workable solutions, just helped format the code better

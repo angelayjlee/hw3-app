@@ -11,11 +11,19 @@ template_path = static_path
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 app.secret_key = os.urandom(24)
 
+<<<<<<< Updated upstream
 #auth
 
+=======
+app.config.update(
+    SESSION_COOKIE_SAMESITE="None",
+    SESSION_COOKIE_SECURE=False,  # True if using HTTPS
+    SESSION_COOKIE_DOMAIN=None,   # Let Flask set domain to localhost
+)
+>>>>>>> Stashed changes
 
 
 oauth = OAuth(app)
@@ -50,6 +58,7 @@ oauth.register(
 )
 
 
+<<<<<<< Updated upstream
 
 
 
@@ -69,6 +78,8 @@ oauth.register(
 
 
 # Route to get NYT API key
+=======
+>>>>>>> Stashed changes
 @app.route('/api/key')
 def get_key():
     return jsonify({'apiKey': os.getenv('NYT_API_KEY')})
@@ -110,15 +121,13 @@ def serve_frontend(path=''):
 
    
 def home():
-    user = session.get('user')
-    if user:
-        return f"<h2>Logged in as {user['email']}</h2><a href='/logout'>Logout</a>"
-    return '<a href="/login">Login with Dex</a>'
+    return redirect('http://localhost:5173/')
+
 
 @app.route('/login')
 def login():
     session['nonce'] = nonce
-    redirect_uri = 'http://localhost:8000/authorize'
+    redirect_uri = 'http://localhost:5173/authorize'
     return oauth.flask_app.authorize_redirect(redirect_uri, nonce=nonce)
 
 @app.route('/authorize')
@@ -126,15 +135,35 @@ def authorize():
     token = oauth.flask_app.authorize_access_token()
     nonce = session.get('nonce')
 
-    user_info = oauth.flask_app.parse_id_token(token, nonce=nonce)  # or use .get('userinfo').json()
+    user_info = oauth.flask_app.parse_id_token(token, nonce=nonce) 
     session['user'] = user_info
-    return redirect('/')
+    return redirect('/')  # <-- redirect to frontend
 
+
+<<<<<<< Updated upstream
+=======
+@app.route('/api/user')
+def get_user():
+    user = session.get('user')
+    if user:
+        return jsonify({'loggedIn': True, 'email': user.get('email'), 'name': user.get('name')})
+    return jsonify({'loggedIn': False})
+
+
+
+
+
+
+>>>>>>> Stashed changes
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect('/')
+    return redirect('http://localhost:5173/')
 
 if __name__ == '__main__':
+<<<<<<< Updated upstream
     debug_mode = os.getenv('FLASK_ENV') != 'production'
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8000)),debug=debug_mode)
+=======
+    app.run(debug=True, host='0.0.0.0', port=8000)
+>>>>>>> Stashed changes

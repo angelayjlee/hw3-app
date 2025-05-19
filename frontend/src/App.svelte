@@ -7,6 +7,17 @@
   let apiKey: string = '';
   let articles: any[] = [];
   let currentDate: string = '';
+  
+  let showDropdown = false;
+
+  function toggleDropdown() {
+    showDropdown = !showDropdown;
+  }
+
+  function login() {
+    // Redirect to your backend's login endpoint
+    window.location.href = 'http://localhost:8000/login';
+  }
 
   function getCurrentDate(): string {
     const today = new Date();
@@ -14,19 +25,60 @@
     return today.toLocaleDateString('en-US', options); // e.g., "Wednesday, April 16, 2025"
   }
 
+<<<<<<< Updated upstream
+=======
+  let userInfo: { loggedIn: boolean, email?: string, name?: string } = { loggedIn: false };
+
+  async function fetchUserInfo() {
+    try {
+      const res = await fetch('http://localhost:8000/api/user', { credentials: 'include' });
+      userInfo = await res.json();
+    } catch {
+      userInfo = { loggedIn: false };
+    }
+  }
+
+
+
+>>>>>>> Stashed changes
   onMount(async () => {
     currentDate = getCurrentDate();
     await fetchArticles();
     try {
+<<<<<<< Updated upstream
       const res = await fetch('/api/key');
       const data = await res.json();
       apiKey = data.apiKey;
     } catch (error) {
+=======
+      const res = await fetch('http://localhost:8000/api/user', { credentials: 'include' }); // Make request to backend for API key
+      const data = await res.json(); // Parse the response as JSON
+      apiKey = data.apiKey; // Store the API key
+    } catch (error) { // Call function to fetch articles after API key is retrieved
+>>>>>>> Stashed changes
       console.error('Failed to fetch API key:', error);
+      
     }
   }); 
 
+<<<<<<< Updated upstream
     // Function to fetch articles from backend (which fetches from NYT)
+=======
+    try {
+    const userRes = await fetch('http://localhost:8000/api/user', { credentials: 'include' });
+    userInfo = await userRes.json();
+    console.log('User info:', userInfo);
+  } catch (error) {
+    userInfo = { loggedIn: false };
+    console.error('Failed to fetch user info:', error);
+  }
+
+  
+
+  });
+
+  // Function to fetch articles from backend (which fetches from NYT)
+>>>>>>> Stashed changes
   const fetchArticles = async () => {
     try{
       const res = await fetch('http://localhost:8000/api/articles'); // Make request to backend for articles
@@ -116,6 +168,10 @@
 </script>
 
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 <main>
   <header>
     <h1 class="logo">The New York Times</h1>
@@ -123,7 +179,33 @@
       <div class="date">{currentDate}</div>
       <div class="today-label">Today's Paper</div>
     </div>
+<<<<<<< Updated upstream
     <hr class="headline-divider">
+=======
+
+
+     <!-- Login or Account button -->
+     {#if !userInfo.loggedIn}
+     <button class="dex-login-button" on:click={login}>Log In</button>
+   {:else}
+     <div class="account-container">
+     <button class="account-btn" on:click={toggleDropdown}>
+       Account ({userInfo.name} {userInfo.email})
+     </button>
+
+     {#if showDropdown}
+       <aside class="sidebar">
+         <div class="sidebar-content">
+           <h3>Good morning, {userInfo.name} {userInfo.email}</h3>
+           <p>{userInfo.email}</p>
+           <a class="logout-link" href="http://localhost:8000/logout">Logout</a>
+         </div>
+       </aside>
+     {/if}
+   </div>
+
+   {/if}
+>>>>>>> Stashed changes
   </header>
 
   <div class="content">
@@ -297,5 +379,4 @@
     </div>
   </footer>
 </main>
-
 
