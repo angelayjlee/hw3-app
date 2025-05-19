@@ -1,85 +1,40 @@
-from flask import Flask, jsonify, redirect, send_from_directory, url_for, session
+from flask import Flask, redirect, url_for, session, jsonify, send_from_directory
 from authlib.integrations.flask_client import OAuth
 from authlib.common.security import generate_token
-import os
 from flask_cors import CORS
+from dotenv import load_dotenv
+import os
 import requests
 
+load_dotenv()
 
-static_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'dist'))
-template_path = static_path
+print("Loaded NYT_API_KEY:", os.getenv("NYT_API_KEY"))
+
 
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
+CORS(app)
 app.secret_key = os.urandom(24)
-
-<<<<<<< Updated upstream
-#auth
-
-=======
-app.config.update(
-    SESSION_COOKIE_SAMESITE="None",
-    SESSION_COOKIE_SECURE=False,  # True if using HTTPS
-    SESSION_COOKIE_DOMAIN=None,   # Let Flask set domain to localhost
-)
->>>>>>> Stashed changes
 
 
 oauth = OAuth(app)
 
 nonce = generate_token()
 
-DEX_CLIENT_ID = os.getenv('OIDC_CLIENT_ID', "flask-app")
-DEX_CLIENT_NAME: str = os.getenv('OIDC_CLIENT_NAME', DEX_CLIENT_ID)
-DEX_CLIENT_SECRET: str = os.getenv('OIDC_CLIENT_SECRET', "flask-secret")
-
-DEX_INTERNAL_HOST = os.getenv('DEX_INTERNAL_HOST', "http://dex:5556")
-DEX_EXTERNAL_HOST = os.getenv('DEX_EXTERNAL_HOST', "http://localhost:5556")
-
-AUTHORIZATION_ENDPOINT = f"{DEX_INTERNAL_HOST}/auth"
-TOKEN_ENDPOINT = f"{DEX_INTERNAL_HOST}/token"
-JWKS_URI = f"{DEX_INTERNAL_HOST}/keys"
-USERINFO_ENDPOINT = f"{DEX_INTERNAL_HOST}/userinfo"
-DEVICE_AUTHORIZATION_ENDPOINT = f"{DEX_INTERNAL_HOST}/device/code"
-# Set up the OAuth client
 
 oauth.register(
-    name=DEX_CLIENT_NAME,
-    client_id=DEX_CLIENT_ID,
-    client_secret=DEX_CLIENT_SECRET,
-    #server_metadata_url=f"{DEX_EXTERNAL_HOST}/.well-known/openid-configuration",
-    authorization_endpoint=AUTHORIZATION_ENDPOINT,
-    token_endpoint=TOKEN_ENDPOINT,
-    jwks_uri=JWKS_URI,
-    userinfo_endpoint=USERINFO_ENDPOINT,
-    device_authorization_endpoint=DEVICE_AUTHORIZATION_ENDPOINT,
+    name=os.getenv('OIDC_CLIENT_NAME'),
+    client_id=os.getenv('OIDC_CLIENT_ID'),
+    client_secret=os.getenv('OIDC_CLIENT_SECRET'),
+    #server_metadata_url='http://dex:5556/.well-known/openid-configuration',
+    authorization_endpoint="http://localhost:5556/auth",
+    token_endpoint="http://dex:5556/token",
+    jwks_uri="http://dex:5556/keys",
+    userinfo_endpoint="http://dex:5556/userinfo",
+    device_authorization_endpoint="http://dex:5556/device/code",
     client_kwargs={'scope': 'openid email profile'}
 )
 
-
-<<<<<<< Updated upstream
-
-
-
-#GIVEN: 
-# oauth.register(
-#     name=os.getenv('OIDC_CLIENT_NAME'),
-#     client_id=os.getenv('OIDC_CLIENT_ID'),
-#     client_secret=os.getenv('OIDC_CLIENT_SECRET'),
-#     #server_metadata_url='http://dex:5556/.well-known/openid-configuration',
-#     authorization_endpoint="http://localhost:5556/auth",
-#     token_endpoint="http://dex:5556/token",
-#     jwks_uri="http://dex:5556/keys",
-#     userinfo_endpoint="http://dex:5556/userinfo",
-#     device_authorization_endpoint="http://dex:5556/device/code",
-#     client_kwargs={'scope': 'openid email profile'}
-# )
-
-
-# Route to get NYT API key
-=======
->>>>>>> Stashed changes
 @app.route('/api/key')
 def get_key():
     return jsonify({'apiKey': os.getenv('NYT_API_KEY')})
@@ -93,14 +48,12 @@ def get_articles():
         response = requests.get(url)
         data = response.json()
 
-        # Filter articles that mention "Davis" or "Sacramento" in the title
         filtered_articles = [
             article for article in data.get('response', {}).get('docs', [])
             if 'davis' in article.get('headline', {}).get('main', '').lower() or
                'sacramento' in article.get('headline', {}).get('main', '').lower()
         ]
         
-        # Send back the filtered articles
         return jsonify({'results': filtered_articles})
     except Exception as e:
         print('Error fetching NYT data:', e)
@@ -108,21 +61,11 @@ def get_articles():
 
 
 @app.route('/')
-@app.route('/<path:path>')
-def serve_frontend(path=''):
-    
-    path = path.lstrip('/')  
-
-    full_path = os.path.join(static_path, path)
-    if path != '' and os.path.exists(os.path.join(static_path,path)):
-        return send_from_directory(static_path, path)
-    else:
-        return send_from_directory(template_path, 'index.html')
-
-   
 def home():
-    return redirect('http://localhost:5173/')
-
+    user = session.get('user')
+    if user:
+        return f"<h2>Logged in as {user['email']}</h2><a href='/logout'>Logout</a>"
+    return '<a href="/login">Login with Dex</a>'
 
 @app.route('/login')
 def login():
@@ -135,13 +78,10 @@ def authorize():
     token = oauth.flask_app.authorize_access_token()
     nonce = session.get('nonce')
 
-    user_info = oauth.flask_app.parse_id_token(token, nonce=nonce) 
+    user_info = oauth.flask_app.parse_id_token(token, nonce=nonce)  # or use .get('userinfo').json()
     session['user'] = user_info
-    return redirect('/')  # <-- redirect to frontend
+    return redirect('/')
 
-
-<<<<<<< Updated upstream
-=======
 @app.route('/api/user')
 def get_user():
     user = session.get('user')
@@ -150,20 +90,10 @@ def get_user():
     return jsonify({'loggedIn': False})
 
 
-
-
-
-
->>>>>>> Stashed changes
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect('http://localhost:5173/')
+    return redirect('/')
 
 if __name__ == '__main__':
-<<<<<<< Updated upstream
-    debug_mode = os.getenv('FLASK_ENV') != 'production'
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8000)),debug=debug_mode)
-=======
     app.run(debug=True, host='0.0.0.0', port=8000)
->>>>>>> Stashed changes
