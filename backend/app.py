@@ -82,6 +82,14 @@ def authorize():
     session['user'] = user_info
     return redirect('/')
 
+@app.route('/api/user')
+def get_user():
+    user = session.get('user')
+    if user:
+        return jsonify({'loggedIn': True, 'email': user.get('email'), 'name': user.get('name')})
+    return jsonify({'loggedIn': False})
+
+
 @app.route('/logout')
 def logout():
     session.clear()

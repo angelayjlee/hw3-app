@@ -6,11 +6,14 @@
   let articles: any[] = [];
   let currentDate: string = '';
 
+
   function getCurrentDate(): string {
     const today = new Date();
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     return today.toLocaleDateString('en-US', options); // e.g., "Wednesday, April 16, 2025"
   }
+
+  let userInfo: { loggedIn: boolean, email?: string, name?: string } = { loggedIn: false };
 
   onMount(async () => {
     currentDate = getCurrentDate();
@@ -22,6 +25,15 @@
     } catch (error) { // Call function to fetch articles after API key is retrieved
       console.error('Failed to fetch API key:', error);
     }
+
+    try {
+    const userRes = await fetch('http://localhost:8000/api/user', { credentials: 'include' });
+    userInfo = await userRes.json();
+    console.log('User info:', userInfo);
+  } catch (error) {
+    console.error('Failed to fetch user info:', error);
+  }
+
   });
 
   // Function to fetch articles from backend (which fetches from NYT)
@@ -38,14 +50,20 @@
 </script>
 
 <main>
-  <header>
+  <header style="position: relative;">
     <h1 class="logo">The New York Times</h1>
     <div class="date-header">
       <div class="date">{currentDate}</div>
       <div class="today-label">Today's Paper</div>
     </div>
+    <!-- Add the button here -->
+    <a href="http://localhost:8000/login" class="dex-login-button" rel="noopener noreferrer">
+      log in
+    </a>
+  
     <hr class="headline-divider">
   </header>
+  
 
   <div class="content">
     <section class="column 1">

@@ -148,3 +148,23 @@ hr {
     flex: 1 1 100%; /* mobile view */
   }
 }
+
+.dex-login-button {
+  position: absolute;
+  top: 10px;   /* adjust spacing from top */
+  right: 10px; /* adjust spacing from right */
+  background-color: #007BFF; /* Bootstrap blue */
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.dex-login-button:hover {
+  background-color: #0056b3; /* darker blue on hover */
+}
