@@ -38,6 +38,81 @@
     }
   }
 
+//------------------------
+  // --- Commenting State ---
+  let comments: { [key: string]: any[] } = {}; // article_id -> comments array
+  let newComment: { [key: string]: string } = {}; // article_id -> new comment text
+
+  // --- Authentication State (replace with real logic) ---
+  let isAuthenticated: boolean = false;
+  let isModerator: boolean = false;
+  let currentUser: string = '';
+
+  // Fetch authentication status (replace with real logic)
+  async function fetchAuthStatus() {
+    try {
+      const res = await fetch('/api/auth/status');
+      const data = await res.json();
+      isAuthenticated = data.isAuthenticated;
+      isModerator = data.isModerator;
+      currentUser = data.user;
+    } catch {
+      isAuthenticated = false;
+      isModerator = false;
+      currentUser = '';
+    }
+  }
+
+  // Fetch comments for all articles
+  async function fetchComments() {
+    for (const article of articles) {
+      const id = article._id || article.web_url; // fallback if _id missing
+      try {
+        const res = await fetch(`/api/comments?article_id=${encodeURIComponent(id)}`);
+        const data = await res.json();
+        comments[id] = data.comments;
+      } catch (e) {
+        comments[id] = [];
+      }
+    }
+  }
+
+  // Post a new comment
+  async function postComment(articleId: string) {
+    if (!newComment[articleId]) return;
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          article_id: articleId,
+          text: newComment[articleId],
+          user: currentUser // or get from session
+        })
+      });
+      if (res.ok) {
+        newComment[articleId] = '';
+        await fetchComments();
+      }
+    } catch (e) {
+      alert('Failed to post comment');
+    }
+  }
+
+  // Remove a comment (moderator only)
+  async function removeComment(commentId: string, articleId: string) {
+    try {
+      const res = await fetch(`/api/comments/${commentId}`, { method: 'DELETE' });
+      if (res.ok) {
+        await fetchComments();
+      }
+    } catch (e) {
+      alert('Failed to remove comment');
+    }
+  }
+
+
+
 </script>
 
 
@@ -72,6 +147,32 @@
           <p>No URL available</p>
         {/if}
 
+        <!-- Comment Section -->
+        <section class="comments">
+          <h3>Comments</h3>
+          {#each comments[article._id] ?? [] as comment}
+            <div class="comment">
+              {#if comment.removed}
+                <em>COMMENT REMOVED BY MODERATOR!</em>
+              {:else}
+                <strong>{comment.user}</strong>: {comment.text}
+                {#if isModerator}
+                  <button on:click={() => removeComment(comment._id, article._id)}>Remove</button>
+                {/if}
+              {/if}
+            </div>
+          {/each}
+          {#if isAuthenticated}
+            <form on:submit|preventDefault={() => postComment(article._id)}>
+              <input bind:value={newComment[article._id]} placeholder="Add a comment..." required />
+              <button type="submit">Post</button>
+            </form>
+          {:else}
+            <p><a href="/login">Log in to comment</a></p>
+          {/if}
+        </section>
+
+
         <hr />
         </article>
       {/each}
@@ -97,6 +198,36 @@
           <p>No URL available</p>
         {/if}
 
+        <!-- Comment Section -->
+        <section class="comments">
+          <h3>Comments</h3>
+          {#each comments[article._id] ?? [] as comment}
+            <div class="comment">
+              {#if comment.removed}
+                <em>COMMENT REMOVED BY MODERATOR!</em>
+              {:else}
+                <strong>{comment.user}</strong>: {comment.text}
+                {#if isModerator}
+                  <button on:click={() => removeComment(comment._id, article._id)}>Remove</button>
+                {/if}
+              {/if}
+            </div>
+          {/each}
+          {#if isAuthenticated}
+            <form on:submit|preventDefault={() => postComment(article._id)}>
+              <input bind:value={newComment[article._id]} placeholder="Add a comment..." required />
+              <button type="submit">Post</button>
+            </form>
+          {:else}
+            <p><a href="/login">Log in to comment</a></p>
+          {/if}
+        </section>
+
+
+
+
+
+
         <hr />
         </article>
       {/each}
@@ -121,6 +252,34 @@
           {:else}
           <p>No URL available</p>
         {/if}
+
+
+
+        <!-- Comment Section -->
+        <section class="comments">
+          <h3>Comments</h3>
+          {#each comments[article._id] ?? [] as comment}
+            <div class="comment">
+              {#if comment.removed}
+                <em>COMMENT REMOVED BY MODERATOR!</em>
+              {:else}
+                <strong>{comment.user}</strong>: {comment.text}
+                {#if isModerator}
+                  <button on:click={() => removeComment(comment._id, article._id)}>Remove</button>
+                {/if}
+              {/if}
+            </div>
+          {/each}
+          {#if isAuthenticated}
+            <form on:submit|preventDefault={() => postComment(article._id)}>
+              <input bind:value={newComment[article._id]} placeholder="Add a comment..." required />
+              <button type="submit">Post</button>
+            </form>
+          {:else}
+            <p><a href="/login">Log in to comment</a></p>
+          {/if}
+        </section>
+
 
         <hr />
         </article>
