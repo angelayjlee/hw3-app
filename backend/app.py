@@ -14,16 +14,11 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 app.secret_key = os.urandom(24)
 
-<<<<<<< Updated upstream
-#auth
-
-=======
 app.config.update(
     SESSION_COOKIE_SAMESITE="None",
     SESSION_COOKIE_SECURE=False,  # True if using HTTPS
     SESSION_COOKIE_DOMAIN=None,   # Let Flask set domain to localhost
 )
->>>>>>> Stashed changes
 
 
 oauth = OAuth(app)
@@ -58,28 +53,6 @@ oauth.register(
 )
 
 
-<<<<<<< Updated upstream
-
-
-
-#GIVEN: 
-# oauth.register(
-#     name=os.getenv('OIDC_CLIENT_NAME'),
-#     client_id=os.getenv('OIDC_CLIENT_ID'),
-#     client_secret=os.getenv('OIDC_CLIENT_SECRET'),
-#     #server_metadata_url='http://dex:5556/.well-known/openid-configuration',
-#     authorization_endpoint="http://localhost:5556/auth",
-#     token_endpoint="http://dex:5556/token",
-#     jwks_uri="http://dex:5556/keys",
-#     userinfo_endpoint="http://dex:5556/userinfo",
-#     device_authorization_endpoint="http://dex:5556/device/code",
-#     client_kwargs={'scope': 'openid email profile'}
-# )
-
-
-# Route to get NYT API key
-=======
->>>>>>> Stashed changes
 @app.route('/api/key')
 def get_key():
     return jsonify({'apiKey': os.getenv('NYT_API_KEY')})
@@ -140,8 +113,6 @@ def authorize():
     return redirect('/')  # <-- redirect to frontend
 
 
-<<<<<<< Updated upstream
-=======
 @app.route('/api/user')
 def get_user():
     user = session.get('user')
@@ -154,16 +125,10 @@ def get_user():
 
 
 
->>>>>>> Stashed changes
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect('http://localhost:5173/')
 
 if __name__ == '__main__':
-<<<<<<< Updated upstream
-    debug_mode = os.getenv('FLASK_ENV') != 'production'
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8000)),debug=debug_mode)
-=======
     app.run(debug=True, host='0.0.0.0', port=8000)
->>>>>>> Stashed changes
